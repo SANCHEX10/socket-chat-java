@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 echo "╔════════════════════════════════════╗"
 echo "║ Socket Chat Java - Menú Principal  ║"
@@ -17,9 +18,9 @@ echo ""
 echo "COMPILACIÓN:"
 echo "  5) Compilar todo"
 echo ""
-read -p "Opción (1-5): " option
+read -r -p "Opción (1-5): " option
 
-case $option in
+case "$option" in
   1)
     echo "Iniciando Servidor GUI..."
     java -cp src gui.ServerGUI
@@ -38,9 +39,11 @@ case $option in
     ;;
   5)
     echo "Compilando..."
-    ./compile.sh
+    javac src/*.java src/cli/*.java src/gui/*.java
+    echo "Compilación completada"
     ;;
   *)
     echo "Opción inválida"
+    exit 1
     ;;
 esac

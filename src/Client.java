@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
@@ -18,8 +19,8 @@ public class Client {
 
     public void connect() throws IOException {
         Socket socket = new Socket(host, port);
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        PrintWriter writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 
         writer.println(username);
 

@@ -1,6 +1,10 @@
+package cli;
+
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -10,9 +14,9 @@ import java.time.format.DateTimeFormatter;
  */
 public class ServerCLI {
     private ServerSocket serverSocket;
-    private Set<ClientHandler> clients = Collections.synchronizedSet(new HashSet<>());
-    private int port;
-    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private final Set<ClientHandler> clients = ConcurrentHashMap.newKeySet();
+    private final int port;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     public ServerCLI(int port) {
         this.port = port;
@@ -49,32 +53,33 @@ public class ServerCLI {
         clients.remove(client);
     }
 
+    public int getClientCount() {
+        return clients.size();
+    }
+
     private String getTime() {
         return LocalDateTime.now().format(formatter);
     }
 
-    /**
-     * Maneja la comunicación con un cliente individual
-     */
     public static class ClientHandler implements Runnable {
-        private Socket socket;
-        private PrintWriter writer;
-        private BufferedReader reader;
-        private String username;
-        private ServerCLI server;
+        private final Socket socket;
+        private final PrintWriter writer;
+        private final BufferedReader reader;
+        private final String username;
+        private final ServerCLI server;
 
         public ClientHandler(Socket socket, ServerCLI server) throws IOException {
             this.socket = socket;
             this.server = server;
-            this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
             this.username = reader.readLine();
         }
 
         @Override
         public void run() {
             try {
-                server.broadcast("✓ " + username + " conectado (Total: " + server.clients.size() + ")");
+                server.broadcast("✓ " + username + " conectado (Total: " + server.getClientCount() + ")");
                 String message;
                 while ((message = reader.readLine()) != null) {
                     server.broadcast(username + ": " + message);
@@ -82,8 +87,8 @@ public class ServerCLI {
             } catch (IOException e) {
                 // Conexión cerrada
             } finally {
-                server.broadcast("✗ " + username + " desconectado (Total: " + server.clients.size() + ")");
                 server.removeClient(this);
+                server.broadcast("✗ " + username + " desconectado (Total: " + server.getClientCount() + ")");
                 try {
                     socket.close();
                 } catch (IOException e) {

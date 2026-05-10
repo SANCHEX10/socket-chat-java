@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Servidor TCP para chat con sockets
@@ -8,7 +10,7 @@ import java.util.*;
  */
 public class Server {
     private ServerSocket serverSocket;
-    private Set<ClientHandler> clients = Collections.synchronizedSet(new HashSet<>());
+    private Set<ClientHandler> clients = ConcurrentHashMap.newKeySet();
     private int port;
 
     public Server(int port) {
@@ -55,8 +57,8 @@ public class Server {
         public ClientHandler(Socket socket, Server server) throws IOException {
             this.socket = socket;
             this.server = server;
-            this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+            this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
             this.username = reader.readLine();
         }
 

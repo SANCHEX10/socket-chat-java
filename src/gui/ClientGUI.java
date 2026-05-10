@@ -1,6 +1,9 @@
+package gui;
+
 import javax.swing.*;
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -92,8 +95,8 @@ public class ClientGUI extends JFrame {
             }
 
             socket = new Socket(host, port);
-            writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            writer = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8), true);
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8));
 
             writer.println(username);
 
